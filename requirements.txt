@@ -1,2 +1,3 @@
 megadetector
 onnx2torch
+google-cloud-firestore
