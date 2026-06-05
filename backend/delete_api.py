@@ -27,7 +27,8 @@ class DeleteAPI:
 
         blob = bucket.blob(blob_name)
 
-        blob.delete()
+        if blob.exists():
+            blob.delete()
 
     def delete_file(self, file_id):
 
