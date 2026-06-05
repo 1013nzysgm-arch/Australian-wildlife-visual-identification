@@ -21,6 +21,9 @@ class DeleteAPI:
         # TODO:
         # 根据 Bucket Name 和文件路径删除 GCS 文件
         # 等 Haolin 确认 Bucket 配置后补充
+        # Delete original file and thumbnail from GCS.
+        # Requires final bucket configuration and blob path format
+        # from the storage module.
 
         self.firestore_service.delete_file(file_id)
 

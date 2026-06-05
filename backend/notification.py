@@ -16,7 +16,14 @@ class NotificationService:
             subscription = sub.to_dict()
 
             user_id = subscription.get("userId")
+
+            if not user_id:
+                continue
+
             species = subscription.get("species")
+
+            if not species:
+                continue
 
             if species in tags:
 

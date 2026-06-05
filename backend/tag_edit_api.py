@@ -22,15 +22,15 @@ class TagEditAPI:
         for tag_name, operation in tag_operations.items():
 
             if operation == 1:
-                tags[tag_name] = 1
+                if tag_name not in tags:
+                    tags[tag_name] = 1
 
             elif operation == 0:
                 tags.pop(tag_name, None)
 
-        db.collection("files").document(file_id).update(
-            {
-                "tags": tags
-            }
+        self.firestore_service.update_tags(
+            file_id,
+            tags
         )
 
         return True

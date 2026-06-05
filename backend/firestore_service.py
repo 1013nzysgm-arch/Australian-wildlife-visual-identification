@@ -26,3 +26,12 @@ class FirestoreService:
         db.collection("files").document(file_id).delete()
 
         return True
+    
+    def update_tags(self, file_id, tags):
+        db.collection("files").document(file_id).update(
+            {
+                "tags": tags
+            }
+        )
+
+        return True
