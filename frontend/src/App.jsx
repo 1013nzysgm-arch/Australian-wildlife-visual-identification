@@ -7,28 +7,37 @@ import { analyzeWildlifeImage } from "./services/api";
 
 function App() {
   const [image, setImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
 
     if (file) {
+      setSelectedFile(file);
       setImage(URL.createObjectURL(file));
       setFileName(file.name);
       setResult(null);
+      setError("");
     }
   };
 
   const handleAnalyze = async () => {
     setLoading(true);
     setResult(null);
+    setError("");
 
-    const prediction = await analyzeWildlifeImage();
-
-    setResult(prediction);
-    setLoading(false);
+    try {
+      const prediction = await analyzeWildlifeImage(selectedFile);
+      setResult(prediction);
+    } catch (err) {
+      setError(err.message || "Analysis failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,7 +85,7 @@ function App() {
               </span>
             </div>
 
-            <ResultCard result={result} loading={loading} />
+            <ResultCard result={result} loading={loading} error={error} />
           </div>
         </section>
 

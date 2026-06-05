@@ -1,4 +1,14 @@
-function ResultCard({ result, loading }) {
+function ResultCard({ result, loading, error }) {
+  if (error) {
+    return (
+      <div className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-red-400/20 bg-red-400/10 p-8 text-center">
+        <div className="mb-4 text-5xl">⚠️</div>
+        <p className="text-lg font-semibold text-red-300">Analysis failed</p>
+        <p className="mt-2 text-sm text-slate-300">{error}</p>
+      </div>
+    );
+  }
+
   if (!result && !loading) {
     return (
       <div className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-950/50 p-8 text-center">
