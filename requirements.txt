@@ -1,0 +1,17 @@
+megadetector
+onnx2torch
+
+google-cloud-firestore
+google-cloud-storage
+
+pillow
+opencv-python
+
+pyyaml
+tqdm
+
+numpy
+matplotlib
+
+torch
+torchvision
