@@ -15,7 +15,7 @@ function ResultCard({ result, loading, error }) {
         <div className="mb-4 text-5xl">🔍</div>
         <p className="text-lg font-semibold">No result yet</p>
         <p className="mt-2 text-sm text-slate-400">
-          Upload an image and click Analyze Wildlife to generate a detection result.
+          Upload an image or video and click Analyze Wildlife to generate a detection result.
         </p>
       </div>
     );
@@ -25,9 +25,9 @@ function ResultCard({ result, loading, error }) {
     return (
       <div className="flex min-h-96 flex-col items-center justify-center rounded-2xl border border-white/10 bg-slate-950/50 p-8 text-center">
         <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-emerald-400 border-t-transparent"></div>
-        <p className="text-lg font-semibold">Analyzing image...</p>
+        <p className="text-lg font-semibold">Analyzing file...</p>
         <p className="mt-2 text-sm text-slate-400">
-          The system is processing the uploaded wildlife image.
+          The system is processing the uploaded wildlife image or video.
         </p>
       </div>
     );

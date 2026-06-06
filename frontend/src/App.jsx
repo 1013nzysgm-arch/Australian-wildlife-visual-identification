@@ -18,10 +18,14 @@ function App() {
 
     if (file) {
       setSelectedFile(file);
-      setImage(URL.createObjectURL(file));
+
+      if (file.type.startsWith("image/")) {
+        setImage(URL.createObjectURL(file));
+      } else {
+        setImage(null);
+      }
+
       setFileName(file.name);
-      setResult(null);
-      setError("");
     }
   };
 

@@ -9,9 +9,9 @@ function UploadCard({
     <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold">Image Upload</h3>
+          <h3 className="text-xl font-bold">Image / Video Upload</h3>
           <p className="text-sm text-slate-400">
-            Choose a JPG or PNG wildlife image.
+            Choose a wildlife image or video.
           </p>
         </div>
 
@@ -32,7 +32,7 @@ function UploadCard({
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/10 text-3xl">
               🦘
             </div>
-            <p className="text-lg font-semibold">Upload wildlife image</p>
+            <p className="text-lg font-semibold">Upload wildlife image or video</p>
             <p className="mt-2 text-sm text-slate-400">
               Click here to select an image from your computer.
             </p>
@@ -41,7 +41,7 @@ function UploadCard({
 
         <input
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
           className="hidden"
           onChange={onImageUpload}
         />
@@ -50,7 +50,7 @@ function UploadCard({
       <div className="mt-5 rounded-2xl bg-slate-950/60 p-4">
         <p className="text-sm text-slate-400">Current status</p>
         <p className="mt-1 font-semibold">
-          {image ? "Image ready for analysis" : "No image uploaded"}
+          {image ? "Image ready for analysis" : "No image or video uploaded"}
         </p>
 
         {fileName && (

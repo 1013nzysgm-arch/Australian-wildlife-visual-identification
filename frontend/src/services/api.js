@@ -1,20 +1,23 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "";
 
-export async function analyzeWildlifeImage(imageFile) {
-  if (!imageFile) {
-    throw new Error("No image file provided.");
+export async function analyzeWildlifeImage(file) {
+  if (!file) {
+    throw new Error("No file provided.");
   }
 
   const formData = new FormData();
-  formData.append("file", imageFile);
+  formData.append("file", file);
 
-  const response = await fetch(`${API_BASE_URL}/predict`, {
+  const isVideo = file.type.startsWith("video/");
+  const endpoint = isVideo ? "/predict-video" : "/predict";
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
-    throw new Error("Failed to analyze image.");
+    throw new Error("Failed to analyze file.");
   }
 
   return response.json();
