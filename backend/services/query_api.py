@@ -1,6 +1,4 @@
-from google.cloud import firestore
-
-db = firestore.Client()
+from backend.services.firestore_service import db
 
 
 class QueryAPI:

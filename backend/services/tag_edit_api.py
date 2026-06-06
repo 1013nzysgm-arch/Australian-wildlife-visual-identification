@@ -1,8 +1,5 @@
-from google.cloud import firestore
 from backend.services.firestore_service import FirestoreService
-
-
-db = firestore.Client()
+from backend.services.firestore_service import db
 
 
 class TagEditAPI:
