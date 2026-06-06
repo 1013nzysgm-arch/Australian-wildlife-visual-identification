@@ -1,6 +1,12 @@
 from google.cloud import storage
 
-SERVICE_ACCOUNT = "cryptic-ground-495000-v3-03e4893a60f1.json"
+import os
+
+SERVICE_ACCOUNT = os.getenv(
+
+    "GOOGLE_APPLICATION_CREDENTIALS"
+
+)
 BUCKET_NAME = "aussieecolens-g65"
 
 

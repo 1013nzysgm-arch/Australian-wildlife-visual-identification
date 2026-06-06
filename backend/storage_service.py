@@ -1,13 +1,25 @@
 from google.cloud import storage
+import os
 
 
 class StorageService:
 
     def __init__(
         self,
-        service_account="cryptic-ground-495000-v3-03e4893a60f1.json",
+        service_account=None,
         bucket_name="aussieecolens-g65"
     ):
+
+        if service_account is None:
+            service_account = os.getenv(
+                "GOOGLE_APPLICATION_CREDENTIALS"
+            )
+
+        if not service_account:
+            raise ValueError(
+                "GOOGLE_APPLICATION_CREDENTIALS is not set"
+            )
+
         self.client = storage.Client.from_service_account_json(
             service_account
         )
