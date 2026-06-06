@@ -1,15 +1,19 @@
 from google.cloud import storage
+
 from backend.services.firestore_service import FirestoreService
-
-
-BUCKET_NAME = "aussieecolens-g65"
+from backend.services.storage_service import (
+    BUCKET_NAME,
+    SERVICE_ACCOUNT_PATH
+)
 
 
 class DeleteAPI:
 
     def __init__(self):
         self.firestore_service = FirestoreService()
-        self.storage_client = storage.Client()
+        self.storage_client = storage.Client.from_service_account_json(
+            str(SERVICE_ACCOUNT_PATH)
+    )
 
     def _delete_gcs_object(self, gcs_url):
 

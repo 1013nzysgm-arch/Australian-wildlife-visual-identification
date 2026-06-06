@@ -9,6 +9,14 @@ from backend.processing.metadata import create_metadata
 from backend.services.storage_service import StorageService
 from backend.services.query_api import QueryAPI
 from backend.services.delete_api import DeleteAPI
+<<<<<<< HEAD
+=======
+from pydantic import BaseModel
+from backend.services.tag_edit_api import TagEditAPI
+
+class TagUpdateRequest(BaseModel):
+    tag_operations: dict
+>>>>>>> 6628c06 (Add Firestore query delete and tag edit API routes)
 
 
 app = FastAPI(
@@ -166,3 +174,20 @@ def delete_file(file_id: str):
         "file_id": file_id
     }
 
+<<<<<<< HEAD
+=======
+@app.patch("/files/{file_id}/tags")
+def update_tags(file_id: str, request: TagUpdateRequest):
+    tag_edit_api = TagEditAPI()
+
+    success = tag_edit_api.update_tags(
+        file_id,
+        request.tag_operations
+    )
+
+    return {
+        "success": success,
+        "file_id": file_id,
+        "tag_operations": request.tag_operations
+    }
+>>>>>>> 6628c06 (Add Firestore query delete and tag edit API routes)
