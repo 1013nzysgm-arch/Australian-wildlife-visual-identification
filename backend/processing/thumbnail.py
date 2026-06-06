@@ -1,18 +1,16 @@
-from PIL import Image
 from pathlib import Path
+from PIL import Image
 
-input_file = "images/Alectura_lathami_1.JPG"
 
-output_dir = Path("thumbnails")
-output_dir.mkdir(exist_ok=True)
+def generate_thumbnail(input_file, output_dir="backend/temp_thumbnails"):
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-img = Image.open(input_file)
+    input_path = Path(input_file)
+    thumbnail_path = output_dir / f"thumbnail_{input_path.name}"
 
-img.thumbnail((400, 400))
+    img = Image.open(input_path)
+    img.thumbnail((400, 400))
+    img.save(thumbnail_path)
 
-thumbnail_path = output_dir / "thumbnail.jpg"
-
-img.save(thumbnail_path)
-
-print("Thumbnail created:")
-print(thumbnail_path)
+    return str(thumbnail_path)

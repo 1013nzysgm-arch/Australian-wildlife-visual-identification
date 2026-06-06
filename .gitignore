@@ -1,2 +1,7 @@
 cryptic-ground-495000-v3-03e4893a60f1.json
 test.mp4
+*.pt
+backend/models/*.pt
+.DS_Store
+__pycache__/
+*.pyc

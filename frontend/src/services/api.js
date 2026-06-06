@@ -5,8 +5,12 @@ export async function analyzeWildlifeImage(imageFile) {
     throw new Error("No image file provided.");
   }
 
+  const formData = new FormData();
+  formData.append("file", imageFile);
+
   const response = await fetch(`${API_BASE_URL}/predict`, {
     method: "POST",
+    body: formData,
   });
 
   if (!response.ok) {
