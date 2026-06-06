@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.processing.checksum import calculate_checksum
 from backend.processing.thumbnail import generate_thumbnail
 from backend.processing.metadata import create_metadata
+from backend.services.storage_service import StorageService
 
 
 app = FastAPI(
@@ -55,6 +56,18 @@ async def predict(file: UploadFile = File(...)):
     checksum = calculate_checksum(file_path)
     thumbnail_path = generate_thumbnail(file_path)
 
+    storage_service = StorageService()
+
+    original_url = storage_service.upload_file(
+        file_path,
+        f"uploads/{file.filename}"
+    )
+
+    thumbnail_url = storage_service.upload_file(
+        thumbnail_path,
+        f"thumbnails/thumbnail_{file.filename}"
+    )
+
     # Try real model prediction first.
     # If local model/dependencies are not ready, use a safe fallback.
     try:
@@ -77,8 +90,8 @@ async def predict(file: UploadFile = File(...)):
     metadata = create_metadata(
         file_type="image",
         checksum=checksum,
-        original_url=str(file_path),
-        thumbnail_url=thumbnail_path,
+        original_url=original_url,
+        thumbnail_url=thumbnail_url,
         tags=tags
     )
 
