@@ -10,3 +10,4 @@ backend/temp_uploads/
 backend/temp_thumbnails/
 backend/temp_videos/
 backend/temp_video_frames/
+venv/

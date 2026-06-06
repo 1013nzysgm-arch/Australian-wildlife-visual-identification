@@ -2,6 +2,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 from backend.processing.checksum import calculate_checksum
 from backend.processing.thumbnail import generate_thumbnail
@@ -36,7 +38,7 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("/api")
 def health_check():
     return {
         "status": "ok",
@@ -216,3 +218,16 @@ async def predict_video(file: UploadFile = File(...)):
         "frameCount": prediction["frame_count"],
         "speciesCounts": prediction["species_counts"]
     }
+
+FRONTEND_DIST = Path("frontend/dist")
+
+if FRONTEND_DIST.exists():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=FRONTEND_DIST / "assets"),
+        name="assets"
+    )
+
+    @app.get("/{full_path:path}")
+    def serve_frontend(full_path: str):
+        return FileResponse(FRONTEND_DIST / "index.html")
