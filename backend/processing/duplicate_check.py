@@ -1,4 +1,4 @@
-from checksum import calculate_checksum
+from backend.processing.checksum import calculate_checksum
 
 file_path = "images/Alectura_lathami_1.JPG"
 

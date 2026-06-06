@@ -1,5 +1,5 @@
 from google.cloud import firestore
-from backend.firestore_service import FirestoreService
+from backend.services.firestore_service import FirestoreService
 
 
 db = firestore.Client()

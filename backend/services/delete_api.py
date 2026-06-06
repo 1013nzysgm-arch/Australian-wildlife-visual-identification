@@ -1,5 +1,5 @@
 from google.cloud import storage
-from backend.firestore_service import FirestoreService
+from backend.services.firestore_service import FirestoreService
 
 
 BUCKET_NAME = "aussieecolens-g65"
