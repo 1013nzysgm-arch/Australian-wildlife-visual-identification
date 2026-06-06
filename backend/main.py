@@ -9,14 +9,14 @@ from backend.processing.metadata import create_metadata
 from backend.services.storage_service import StorageService
 from backend.services.query_api import QueryAPI
 from backend.services.delete_api import DeleteAPI
-<<<<<<< HEAD
-=======
+from backend.processing.video_classifier import classify_video
+
 from pydantic import BaseModel
 from backend.services.tag_edit_api import TagEditAPI
 
 class TagUpdateRequest(BaseModel):
     tag_operations: dict
->>>>>>> 6628c06 (Add Firestore query delete and tag edit API routes)
+
 
 
 app = FastAPI(
@@ -174,8 +174,7 @@ def delete_file(file_id: str):
         "file_id": file_id
     }
 
-<<<<<<< HEAD
-=======
+
 @app.patch("/files/{file_id}/tags")
 def update_tags(file_id: str, request: TagUpdateRequest):
     tag_edit_api = TagEditAPI()
@@ -190,4 +189,30 @@ def update_tags(file_id: str, request: TagUpdateRequest):
         "file_id": file_id,
         "tag_operations": request.tag_operations
     }
->>>>>>> 6628c06 (Add Firestore query delete and tag edit API routes)
+
+@app.post("/predict-video")
+async def predict_video(file: UploadFile = File(...)):
+    video_dir = Path("backend/temp_videos")
+    video_dir.mkdir(parents=True, exist_ok=True)
+
+    video_path = video_dir / file.filename
+
+    content = await file.read()
+
+    with open(video_path, "wb") as f:
+        f.write(content)
+
+    prediction = classify_video(video_path)
+
+    return {
+        "species": prediction["species"],
+        "scientificName": prediction["species"],
+        "confidence": prediction["confidence"],
+        "category": "Wildlife",
+        "riskLevel": "Unknown",
+        "habitat": "Australian wildlife habitat",
+        "description": f"Video processed successfully. {prediction['frame_count']} frames were analysed.",
+        "suggestedAction": "Review detected species and observe from a safe distance.",
+        "frameCount": prediction["frame_count"],
+        "speciesCounts": prediction["species_counts"]
+    }
