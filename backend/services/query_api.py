@@ -17,17 +17,12 @@ class QueryAPI:
                 results.append(data)
                 continue
 
-            matched = False
-
             for tag_name in tags.keys():
                 tag_text = tag_name.lower().strip()
 
                 if search_text in tag_text or tag_text in search_text:
-                    matched = True
+                    results.append(data)
                     break
-
-            if matched:
-                results.append(data)
 
         return results
 
