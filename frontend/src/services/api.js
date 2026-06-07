@@ -68,3 +68,13 @@ export async function updateRecordTags(fileId, tagOperations, adminKey) {
 
   return response.json();
 }
+
+export async function getAllRecords() {
+  const response = await fetch("/query/all");
+
+  if (!response.ok) {
+    throw new Error("Failed to load records.");
+  }
+
+  return response.json();
+}

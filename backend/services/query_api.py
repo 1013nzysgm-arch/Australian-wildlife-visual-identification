@@ -4,17 +4,29 @@ from backend.services.firestore_service import db
 class QueryAPI:
 
     def find_by_species(self, species_name):
-
         results = []
+        search_text = species_name.lower().strip()
 
         docs = db.collection("files").stream()
 
         for doc in docs:
             data = doc.to_dict()
-
             tags = data.get("tags", {})
 
-            if species_name in tags:
+            if not search_text:
+                results.append(data)
+                continue
+
+            matched = False
+
+            for tag_name in tags.keys():
+                tag_text = tag_name.lower().strip()
+
+                if search_text in tag_text or tag_text in search_text:
+                    matched = True
+                    break
+
+            if matched:
                 results.append(data)
 
         return results

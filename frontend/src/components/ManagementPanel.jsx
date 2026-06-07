@@ -3,6 +3,7 @@ import {
   searchBySpecies,
   deleteRecord,
   updateRecordTags,
+  getAllRecords,
 } from "../services/api";
 
 function ManagementPanel() {
@@ -10,19 +11,20 @@ function ManagementPanel() {
   const [records, setRecords] = useState([]);
   const [message, setMessage] = useState("");
 
-  async function handleSearch() {
-    if (!species.trim()) return;
-
+    async function handleSearch() {
     setMessage("Searching...");
 
     try {
-      const data = await searchBySpecies(species.trim());
-      setRecords(data.results || []);
-      setMessage(`${data.count} record(s) found.`);
+        const data = species.trim()
+        ? await searchBySpecies(species.trim())
+        : await getAllRecords();
+
+        setRecords(data.results || []);
+        setMessage(`${data.count} record(s) found.`);
     } catch (error) {
-      setMessage("Search failed.");
+        setMessage("Search failed.");
     }
-  }
+    }
 
   async function handleDelete(fileId) {
     const adminKey = prompt("Enter admin key:");

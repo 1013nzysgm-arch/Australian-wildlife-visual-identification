@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -19,7 +19,14 @@ from backend.services.tag_edit_api import TagEditAPI
 class TagUpdateRequest(BaseModel):
     tag_operations: dict
 
+ADMIN_KEY = "FIT5225-2026"
 
+def verify_admin_key(x_admin_key: str = Header(default=None)):
+    if x_admin_key != ADMIN_KEY:
+        raise HTTPException(
+            status_code=403,
+            detail="Admin permission required."
+        )
 
 app = FastAPI(
     title="AussieEcoLense Backend",
@@ -165,10 +172,10 @@ def query_by_species_count(species_name: str, min_count: int):
     }
 
 @app.delete("/files/{file_id}")
-def delete_file(file_id: str):
+def delete_file(file_id: str, x_admin_key: str = Header(default=None)):
+    verify_admin_key(x_admin_key)
 
     delete_api = DeleteAPI()
-
     success = delete_api.delete_file(file_id)
 
     return {
@@ -178,7 +185,13 @@ def delete_file(file_id: str):
 
 
 @app.patch("/files/{file_id}/tags")
-def update_tags(file_id: str, request: TagUpdateRequest):
+def update_tags(
+    file_id: str,
+    request: TagUpdateRequest,
+    x_admin_key: str = Header(default=None)
+):
+    verify_admin_key(x_admin_key)
+
     tag_edit_api = TagEditAPI()
 
     success = tag_edit_api.update_tags(
@@ -217,6 +230,16 @@ async def predict_video(file: UploadFile = File(...)):
         "suggestedAction": "Review detected species and observe from a safe distance.",
         "frameCount": prediction["frame_count"],
         "speciesCounts": prediction["species_counts"]
+    }
+
+@app.get("/query/all")
+def query_all_records():
+    query_api = QueryAPI()
+    results = query_api.find_by_species("")
+
+    return {
+        "count": len(results),
+        "results": results
     }
 
 FRONTEND_DIST = Path("frontend/dist")
