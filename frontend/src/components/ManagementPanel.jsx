@@ -40,30 +40,50 @@ function ManagementPanel() {
     }
   }
 
-  async function handleEditTags(fileId) {
+    async function handleEditTags(record) {
     const adminKey = prompt("Enter admin key:");
     if (!adminKey) return;
 
-    const tagName = prompt("Enter tag name:");
-    if (!tagName) return;
+    const currentTags = Object.keys(record.tags || {});
 
-    const operation = prompt("Enter operation: 1 to add, 0 to remove");
-    if (operation !== "1" && operation !== "0") return;
+    const input = prompt(
+        "Edit tags. Use comma-separated names:",
+        currentTags.join(", ")
+    );
+
+    if (input === null) return;
+
+    const newTags = input
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean);
+
+    const tagOperations = {};
+
+    currentTags.forEach((tag) => {
+        if (!newTags.includes(tag)) {
+        tagOperations[tag] = 0;
+        }
+    });
+
+    newTags.forEach((tag) => {
+        if (!currentTags.includes(tag)) {
+        tagOperations[tag] = 1;
+        }
+    });
+
+    if (Object.keys(tagOperations).length === 0) {
+        setMessage("No tag changes detected.");
+        return;
+    }
 
     try {
-      await updateRecordTags(
-        fileId,
-        {
-          [tagName]: Number(operation),
-        },
-        adminKey
-      );
-
-      setMessage("Tags updated. Search again to refresh results.");
+        await updateRecordTags(record.file_id, tagOperations, adminKey);
+        setMessage("Tags updated. Search again to refresh results.");
     } catch (error) {
-      setMessage("Tag update failed. Admin key may be wrong.");
+        setMessage("Tag update failed. Admin key may be wrong.");
     }
-  }
+    }
 
   return (
     <section className="mt-10 rounded-3xl border border-slate-700 bg-slate-900/70 p-6 shadow-xl">
@@ -115,14 +135,14 @@ function ManagementPanel() {
 
             <div className="mt-4 flex gap-3">
               <button
-                onClick={() => handleEditTags(record.file_id)}
+                onClick={() => handleEditTags(record)}
                 className="rounded-lg border border-sky-400 px-4 py-2 text-sm text-sky-300 hover:bg-sky-400/10"
               >
                 Edit Tags
               </button>
 
               <button
-                onClick={() => handleDelete(record.file_id)}
+                onClick={() => handleDelete(record)}
                 className="rounded-lg border border-red-400 px-4 py-2 text-sm text-red-300 hover:bg-red-400/10"
               >
                 Delete
