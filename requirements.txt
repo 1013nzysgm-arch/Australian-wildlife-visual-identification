@@ -1,5 +1,6 @@
-megadetector
-onnx2torch
+fastapi
+uvicorn
+python-multipart
 
 google-cloud-firestore
 google-cloud-storage
@@ -7,11 +8,12 @@ google-cloud-storage
 pillow
 opencv-python
 
-pyyaml
-tqdm
-
-numpy
-matplotlib
-
+megadetector
+onnx2torch
 torch
 torchvision
+
+pyyaml
+tqdm
+numpy
+matplotlib
