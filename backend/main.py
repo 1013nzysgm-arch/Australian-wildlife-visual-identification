@@ -141,6 +141,15 @@ async def predict(file: UploadFile = File(...)):
         "savedToFirestore": saved_to_firestore
     }
 
+@app.get("/query/all")
+def query_all_records():
+    query_api = QueryAPI()
+    results = query_api.find_by_species("")
+
+    return {
+        "count": len(results),
+        "results": results
+    }
 
 @app.get("/query/species/{species_name}")
 def query_by_species(species_name: str):
@@ -230,16 +239,6 @@ async def predict_video(file: UploadFile = File(...)):
         "suggestedAction": "Review detected species and observe from a safe distance.",
         "frameCount": prediction["frame_count"],
         "speciesCounts": prediction["species_counts"]
-    }
-
-@app.get("/query/all")
-def query_all_records():
-    query_api = QueryAPI()
-    results = query_api.find_by_species("")
-
-    return {
-        "count": len(results),
-        "results": results
     }
 
 FRONTEND_DIST = Path("frontend/dist")
