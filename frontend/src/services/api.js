@@ -22,3 +22,49 @@ export async function analyzeWildlifeImage(file) {
 
   return response.json();
 }
+
+export async function searchBySpecies(speciesName) {
+  const response = await fetch(
+    `/query/species/${encodeURIComponent(speciesName)}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to search records.");
+  }
+
+  return response.json();
+}
+
+export async function deleteRecord(fileId, adminKey) {
+  const response = await fetch(`/files/${fileId}`, {
+    method: "DELETE",
+    headers: {
+      "X-Admin-Key": adminKey,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete record.");
+  }
+
+  return response.json();
+}
+
+export async function updateRecordTags(fileId, tagOperations, adminKey) {
+  const response = await fetch(`/files/${fileId}/tags`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Admin-Key": adminKey,
+    },
+    body: JSON.stringify({
+      tag_operations: tagOperations,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update tags.");
+  }
+
+  return response.json();
+}

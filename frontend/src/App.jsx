@@ -4,6 +4,8 @@ import UploadCard from "./components/UploadCard";
 import ResultCard from "./components/ResultCard";
 import InfoCards from "./components/InfoCards";
 import { analyzeWildlifeImage } from "./services/api";
+import ManagementPanel from "./components/ManagementPanel";
+
 
 function App() {
   const [image, setImage] = useState(null);
@@ -94,6 +96,7 @@ function App() {
         </section>
 
         <InfoCards />
+        <ManagementPanel />
       </main>
     </div>
   );
