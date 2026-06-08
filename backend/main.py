@@ -5,21 +5,29 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
+from pydantic import BaseModel
+
 from backend.processing.checksum import calculate_checksum
 from backend.processing.thumbnail import generate_thumbnail
 from backend.processing.metadata import create_metadata
+from backend.processing.video_classifier import classify_video
+
 from backend.services.storage_service import StorageService
 from backend.services.query_api import QueryAPI
 from backend.services.delete_api import DeleteAPI
-from backend.processing.video_classifier import classify_video
-
-from pydantic import BaseModel
 from backend.services.tag_edit_api import TagEditAPI
+
 
 class TagUpdateRequest(BaseModel):
     tag_operations: dict
 
+
+class TagQueryRequest(BaseModel):
+    tags: dict
+
+
 ADMIN_KEY = "FIT5225-2026"
+
 
 def verify_admin_key(x_admin_key: str = Header(default=None)):
     if x_admin_key != ADMIN_KEY:
@@ -27,6 +35,7 @@ def verify_admin_key(x_admin_key: str = Header(default=None)):
             status_code=403,
             detail="Admin permission required."
         )
+
 
 app = FastAPI(
     title="AussieEcoLense Backend",
@@ -87,8 +96,6 @@ async def predict(file: UploadFile = File(...)):
         f"thumbnails/thumbnail_{file.filename}"
     )
 
-    # Try real model prediction first.
-    # If local model/dependencies are not ready, use a safe fallback.
     try:
         from backend.processing.species_classifier import classify_image
 
@@ -116,8 +123,6 @@ async def predict(file: UploadFile = File(...)):
 
     saved_to_firestore = False
 
-    # Optional Firestore save.
-    # This will not break local testing if GCP credentials are missing.
     try:
         from backend.services.firestore_service import FirestoreService
 
@@ -141,6 +146,35 @@ async def predict(file: UploadFile = File(...)):
         "savedToFirestore": saved_to_firestore
     }
 
+
+@app.post("/predict-video")
+async def predict_video(file: UploadFile = File(...)):
+    video_dir = Path("backend/temp_videos")
+    video_dir.mkdir(parents=True, exist_ok=True)
+
+    video_path = video_dir / file.filename
+
+    content = await file.read()
+
+    with open(video_path, "wb") as f:
+        f.write(content)
+
+    prediction = classify_video(video_path)
+
+    return {
+        "species": prediction["species"],
+        "scientificName": prediction["species"],
+        "confidence": prediction["confidence"],
+        "category": "Wildlife",
+        "riskLevel": "Unknown",
+        "habitat": "Australian wildlife habitat",
+        "description": f"Video processed successfully. {prediction['frame_count']} frames were analysed.",
+        "suggestedAction": "Review detected species and observe from a safe distance.",
+        "frameCount": prediction["frame_count"],
+        "speciesCounts": prediction["species_counts"]
+    }
+
+
 @app.get("/query/all")
 def query_all_records():
     query_api = QueryAPI()
@@ -151,10 +185,34 @@ def query_all_records():
         "results": results
     }
 
+
+@app.post("/query/tags")
+def query_by_tags(request: TagQueryRequest):
+    query_api = QueryAPI()
+    results = query_api.find_by_multiple_species(request.tags)
+
+    return {
+        "query": request.tags,
+        "count": len(results),
+        "results": results
+    }
+
+
+@app.get("/query/thumbnail")
+def query_by_thumbnail(thumbnail_url: str):
+    query_api = QueryAPI()
+    original_url = query_api.find_by_thumbnail_url(thumbnail_url)
+
+    return {
+        "thumbnail_url": thumbnail_url,
+        "original_url": original_url,
+        "found": original_url is not None
+    }
+
+
 @app.get("/query/species/{species_name}")
 def query_by_species(species_name: str):
     query_api = QueryAPI()
-
     results = query_api.find_by_species(species_name)
 
     return {
@@ -179,6 +237,7 @@ def query_by_species_count(species_name: str, min_count: int):
         "count": len(results),
         "results": results
     }
+
 
 @app.delete("/files/{file_id}")
 def delete_file(file_id: str, x_admin_key: str = Header(default=None)):
@@ -214,32 +273,6 @@ def update_tags(
         "tag_operations": request.tag_operations
     }
 
-@app.post("/predict-video")
-async def predict_video(file: UploadFile = File(...)):
-    video_dir = Path("backend/temp_videos")
-    video_dir.mkdir(parents=True, exist_ok=True)
-
-    video_path = video_dir / file.filename
-
-    content = await file.read()
-
-    with open(video_path, "wb") as f:
-        f.write(content)
-
-    prediction = classify_video(video_path)
-
-    return {
-        "species": prediction["species"],
-        "scientificName": prediction["species"],
-        "confidence": prediction["confidence"],
-        "category": "Wildlife",
-        "riskLevel": "Unknown",
-        "habitat": "Australian wildlife habitat",
-        "description": f"Video processed successfully. {prediction['frame_count']} frames were analysed.",
-        "suggestedAction": "Review detected species and observe from a safe distance.",
-        "frameCount": prediction["frame_count"],
-        "speciesCounts": prediction["species_counts"]
-    }
 
 FRONTEND_DIST = Path("frontend/dist")
 
