@@ -186,15 +186,25 @@ Administrators can edit species tags associated with existing records.
 
 Administrators can permanently remove records from the system. This operation removes both the Firestore metadata and the corresponding files stored in Google Cloud Storage.
 
-## Administrative Functions
+## Authentication
 
-To prevent accidental modification of observation records, administrative operations require an administrator key.
+The system uses AWS Cognito for user authentication.
 
-Administrative operations include:
+Supported authentication features:
 
-* Edit Tags
-* Delete Records
+- User sign-up
+- Email verification
+- User sign-in
+- User sign-out
+- Frontend access control
 
+Users must sign in before accessing the wildlife observation system.
+
+For deployment demonstration, the application can be accessed through an HTTPS tunnel such as ngrok because AWS Cognito requires HTTPS callback URLs for public deployments.
+
+## Administrator Access
+
+Administrative operations require an additional administrator key.
 Administrator Key:
 
 ```text
