@@ -7,8 +7,8 @@ export const cognitoConfig = {
         oauth: {
           domain: "us-east-1hgxny29tx.auth.us-east-1.amazoncognito.com",
           scopes: ["openid", "email", "profile"],
-          redirectSignIn: ["http://localhost:5173","https://strut-profound-headset.ngrok-free.dev"],
-          redirectSignOut: ["http://localhost:5173","https://strut-profound-headset.ngrok-free.dev"],
+          redirectSignIn: [window.location.origin],
+          redirectSignOut: [window.location.origin],
           responseType: "code",
         },
       },
