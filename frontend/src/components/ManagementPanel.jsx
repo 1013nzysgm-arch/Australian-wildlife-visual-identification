@@ -4,6 +4,8 @@ import {
   deleteRecord,
   updateRecordTags,
   getAllRecords,
+  searchByTagCounts,
+  getOriginalByThumbnail,
 } from "../services/api";
 
 function ManagementPanel() {
@@ -11,20 +13,58 @@ function ManagementPanel() {
   const [records, setRecords] = useState([]);
   const [message, setMessage] = useState("");
 
-    async function handleSearch() {
+  const [tagQuery, setTagQuery] = useState('{"dingo": 1}');
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [thumbnailResult, setThumbnailResult] = useState("");
+
+  async function handleSearch() {
     setMessage("Searching...");
 
     try {
-        const data = species.trim()
+      const data = species.trim()
         ? await searchBySpecies(species.trim())
         : await getAllRecords();
 
-        setRecords(data.results || []);
-        setMessage(`${data.count} record(s) found.`);
+      setRecords(data.results || []);
+      setMessage(`${data.count} record(s) found.`);
     } catch (error) {
-        setMessage("Search failed.");
+      setMessage("Search failed.");
     }
+  }
+
+  async function handleAdvancedTagSearch() {
+    setMessage("Searching by tag counts...");
+
+    try {
+      const parsedTags = JSON.parse(tagQuery);
+      const data = await searchByTagCounts(parsedTags);
+
+      setRecords(data.results || []);
+      setMessage(`${data.count} record(s) found by tag-count query.`);
+    } catch (error) {
+      setMessage("Advanced tag query failed. Please check JSON format.");
     }
+  }
+
+  async function handleThumbnailLookup() {
+    if (!thumbnailUrl.trim()) return;
+
+    setMessage("Looking up thumbnail URL...");
+
+    try {
+      const data = await getOriginalByThumbnail(thumbnailUrl.trim());
+
+      if (data.found) {
+        setThumbnailResult(data.original_url);
+        setMessage("Original file URL found.");
+      } else {
+        setThumbnailResult("");
+        setMessage("No matching original file found.");
+      }
+    } catch (error) {
+      setMessage("Thumbnail lookup failed.");
+    }
+  }
 
   async function handleDelete(fileId) {
     const adminKey = prompt("Enter admin key:");
@@ -40,50 +80,50 @@ function ManagementPanel() {
     }
   }
 
-    async function handleEditTags(record) {
+  async function handleEditTags(record) {
     const adminKey = prompt("Enter admin key:");
     if (!adminKey) return;
 
     const currentTags = Object.keys(record.tags || {});
 
     const input = prompt(
-        "Edit tags. Use comma-separated names:",
-        currentTags.join(", ")
+      "Edit tags. Use comma-separated names:",
+      currentTags.join(", ")
     );
 
     if (input === null) return;
 
     const newTags = input
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean);
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
 
     const tagOperations = {};
 
     currentTags.forEach((tag) => {
-        if (!newTags.includes(tag)) {
+      if (!newTags.includes(tag)) {
         tagOperations[tag] = 0;
-        }
+      }
     });
 
     newTags.forEach((tag) => {
-        if (!currentTags.includes(tag)) {
+      if (!currentTags.includes(tag)) {
         tagOperations[tag] = 1;
-        }
+      }
     });
 
     if (Object.keys(tagOperations).length === 0) {
-        setMessage("No tag changes detected.");
-        return;
+      setMessage("No tag changes detected.");
+      return;
     }
 
     try {
-        await updateRecordTags(record.file_id, tagOperations, adminKey);
-        setMessage("Tags updated. Search again to refresh results.");
+      await updateRecordTags(record.file_id, tagOperations, adminKey);
+      setMessage("Tags updated. Search again to refresh results.");
     } catch (error) {
-        setMessage("Tag update failed. Admin key may be wrong.");
+      setMessage("Tag update failed. Admin key may be wrong.");
     }
-    }
+  }
 
   return (
     <section className="mt-10 rounded-3xl border border-slate-700 bg-slate-900/70 p-6 shadow-xl">
@@ -109,6 +149,53 @@ function ManagementPanel() {
         </button>
       </div>
 
+      <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-4">
+        <h4 className="font-semibold">Advanced Tag Query</h4>
+        <p className="mt-1 text-sm text-slate-400">
+          Use JSON format for tag count queries. Example: {"{"}"dingo": 1, "kangaroo": 2{"}"}
+        </p>
+
+        <textarea
+          value={tagQuery}
+          onChange={(event) => setTagQuery(event.target.value)}
+          className="mt-3 min-h-24 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"
+        />
+
+        <button
+          onClick={handleAdvancedTagSearch}
+          className="mt-3 rounded-xl border border-emerald-400 px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-400/10"
+        >
+          Search by Tag Counts
+        </button>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-4">
+        <h4 className="font-semibold">Thumbnail URL Lookup</h4>
+        <p className="mt-1 text-sm text-slate-400">
+          Enter a stored thumbnail URL to retrieve its original file URL.
+        </p>
+
+        <input
+          value={thumbnailUrl}
+          onChange={(event) => setThumbnailUrl(event.target.value)}
+          placeholder="gs://bucket/thumbnails/thumbnail_example.jpg"
+          className="mt-3 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-sm text-white outline-none focus:border-emerald-400"
+        />
+
+        <button
+          onClick={handleThumbnailLookup}
+          className="mt-3 rounded-xl border border-sky-400 px-4 py-2 text-sm text-sky-300 hover:bg-sky-400/10"
+        >
+          Get Original URL
+        </button>
+
+        {thumbnailResult && (
+          <p className="mt-3 break-all text-sm text-sky-300">
+            Original URL: {thumbnailResult}
+          </p>
+        )}
+      </div>
+
       {message && <p className="mt-4 text-sm text-emerald-300">{message}</p>}
 
       <div className="mt-6 space-y-4">
@@ -131,6 +218,10 @@ function ManagementPanel() {
 
             <p className="mt-1 break-all text-sm text-slate-500">
               Original: {record.original_url}
+            </p>
+
+            <p className="mt-1 break-all text-sm text-slate-500">
+              Thumbnail: {record.thumbnail_url}
             </p>
 
             <div className="mt-4 flex gap-3">

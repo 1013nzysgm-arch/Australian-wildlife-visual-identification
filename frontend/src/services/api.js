@@ -1,4 +1,4 @@
-const API_BASE_URL = "";
+const API_BASE_URL = import.meta.env.DEV ? "http://127.0.0.1:8000" : "";
 
 export async function analyzeWildlifeImage(file) {
   if (!file) {
@@ -23,9 +23,19 @@ export async function analyzeWildlifeImage(file) {
   return response.json();
 }
 
+export async function getAllRecords() {
+  const response = await fetch(`${API_BASE_URL}/query/all`);
+
+  if (!response.ok) {
+    throw new Error("Failed to load records.");
+  }
+
+  return response.json();
+}
+
 export async function searchBySpecies(speciesName) {
   const response = await fetch(
-    `/query/species/${encodeURIComponent(speciesName)}`
+    `${API_BASE_URL}/query/species/${encodeURIComponent(speciesName)}`
   );
 
   if (!response.ok) {
@@ -35,8 +45,40 @@ export async function searchBySpecies(speciesName) {
   return response.json();
 }
 
+export async function searchByTagCounts(tags) {
+  const response = await fetch(`${API_BASE_URL}/query/tags`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      tags,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to search by tag counts.");
+  }
+
+  return response.json();
+}
+
+export async function getOriginalByThumbnail(thumbnailUrl) {
+  const response = await fetch(
+    `${API_BASE_URL}/query/thumbnail?thumbnail_url=${encodeURIComponent(
+      thumbnailUrl
+    )}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to find original file.");
+  }
+
+  return response.json();
+}
+
 export async function deleteRecord(fileId, adminKey) {
-  const response = await fetch(`/files/${fileId}`, {
+  const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
     method: "DELETE",
     headers: {
       "X-Admin-Key": adminKey,
@@ -51,7 +93,7 @@ export async function deleteRecord(fileId, adminKey) {
 }
 
 export async function updateRecordTags(fileId, tagOperations, adminKey) {
-  const response = await fetch(`/files/${fileId}/tags`, {
+  const response = await fetch(`${API_BASE_URL}/files/${fileId}/tags`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -64,16 +106,6 @@ export async function updateRecordTags(fileId, tagOperations, adminKey) {
 
   if (!response.ok) {
     throw new Error("Failed to update tags.");
-  }
-
-  return response.json();
-}
-
-export async function getAllRecords() {
-  const response = await fetch("/query/all");
-
-  if (!response.ok) {
-    throw new Error("Failed to load records.");
   }
 
   return response.json();
