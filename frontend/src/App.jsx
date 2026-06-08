@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getCurrentUser, signInWithRedirect, signOut } from "aws-amplify/auth";
 import Header from "./components/Header";
 import UploadCard from "./components/UploadCard";
 import ResultCard from "./components/ResultCard";
@@ -8,6 +9,22 @@ import ManagementPanel from "./components/ManagementPanel";
 
 
 function App() {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  useEffect(() => {
+    async function checkUser() {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    }
+
+    checkUser();
+  }, []);
   const [image, setImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileName, setFileName] = useState("");
@@ -46,9 +63,44 @@ function App() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
+        Loading authentication...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-6 text-center text-white">
+        <h1 className="text-4xl font-bold">AussieEcoLense</h1>
+        <p className="mt-4 max-w-xl text-slate-300">
+          Please sign in to access the wildlife observation platform.
+        </p>
+
+        <button
+          onClick={() => signInWithRedirect()}
+          className="mt-8 rounded-2xl bg-emerald-500 px-6 py-3 font-bold text-slate-950 hover:bg-emerald-400"
+        >
+          Sign in with AWS Cognito
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white">
       <Header />
+
+      <div className="mx-auto flex max-w-6xl justify-end px-6 pt-4">
+        <button
+          onClick={() => signOut()}
+          className="rounded-xl border border-red-400 px-4 py-2 text-sm text-red-300 hover:bg-red-400/10"
+        >
+          Sign Out
+        </button>
+      </div>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         <section className="mb-10">
